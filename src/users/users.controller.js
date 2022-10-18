@@ -7,7 +7,11 @@ const Users = require('../models/users.models')
 
 //? Function for getting all the users
 const findAllUsers = async() =>{
-  const response = await Users.findAll()
+  const response = await Users.findAll({
+    where:{
+      status: 'active'
+    }
+  })
   return response
 }
 
@@ -15,7 +19,8 @@ const findAllUsers = async() =>{
 const findOneUser = async(id) =>{
   const response = await Users.findOne({
     where:{
-      id: id
+      id: id,
+      status: 'active'
     }
   })
   return response
@@ -24,7 +29,8 @@ const findOneUser = async(id) =>{
 const findUserByEmail = async(email) =>{
   const response = await Users.findOne({
     where:{
-      email: email
+      email: email,
+      status: 'active'
     }
   })
   return response 
