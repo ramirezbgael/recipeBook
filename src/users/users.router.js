@@ -10,8 +10,12 @@ require('../middlewares/auth.middleware')(passport)
 //? Route /
 router.route('/')
   .get(
-  passport.authenticate('jwt', {session: false}), 
-  usersServices.getAllUsers
+    passport.authenticate('jwt', {session: false}), 
+    usersServices.getAllUsers
+  )
+  .post(
+    passport.authenticate('jwt', {session: false}),
+    usersServices.postUser
   )
 
 //? Route /ME

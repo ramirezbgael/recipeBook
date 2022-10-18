@@ -52,12 +52,11 @@ const updateUser = async(id, data) =>{
   const response = await Users.update({
     firstName: data.firstName,
     lastName: data.lastName,
-    email: data.email,
-    password: hashPassword(data.password),
     phone: data.phone,
     birthday: data.birthday,
     gender: data.gender,
-    country: data.country
+    country: data.country,
+    status: data.status
   },{
     where: {
       id: id

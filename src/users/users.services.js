@@ -82,10 +82,10 @@ const putUser = (req, res) =>{
 //? Patches one user
 const patchUser = (req, res) =>{
   const id = req.params.id
-  const { firstName, lastName, email, password, phone, birthday, gender, country } = req.body
+  const { firstName, lastName, phone, birthday, gender, country } = req.body
   
-  if ({ firstName, lastName, email, password, phone, birthday, gender, country }){
-    usersController.updateUser(id, { firstName, lastName, email, password, phone, birthday, gender, country })
+  if ({ firstName, lastName, phone, birthday, gender, country }){
+    usersController.updateUser(id, { firstName, lastName, phone, birthday, gender, country })
       .then(response => {
         res.status(201).json({message: 'User patched'})
       })
@@ -98,8 +98,6 @@ const patchUser = (req, res) =>{
       values: {
         firstName: 'String',
         lastName: 'String',
-        email: 'String',
-        password: 'String',
         phone: 'String',
         birthday: 'String'
       }
@@ -133,12 +131,12 @@ const getMyUser = (req, res) =>{
 
 const patchMyUser = (req, res) =>{
   const id = req.user.id
-  const { firstName, lastName, email, password, phone, birthday, gender, country } = req.body
+  const { firstName, lastName, phone, birthday, gender, country } = req.body
   
-  if ({ firstName, lastName, email, password, phone, birthday, gender, country }){
-    usersController.updateUser(id, { firstName, lastName, email, password, phone, birthday, gender, country })
+  if ({ firstName, lastName, phone, birthday, gender, country }){
+    usersController.updateUser(id, { firstName, lastName, phone, birthday, gender, country })
       .then(response => {
-        res.status(201).json({message: 'User patched'})
+        res.status(201).json({message: 'User patched', response})
       })
       .catch(err => {
         res.status(400).json({message: err.message})
@@ -150,7 +148,6 @@ const patchMyUser = (req, res) =>{
         firstName: 'String',
         lastName: 'String',
         email: 'String',
-        password: 'String',
         phone: 'String',
         birthday: 'String'
       }
@@ -160,12 +157,13 @@ const patchMyUser = (req, res) =>{
 
 const deleteMyUser = (req, res) =>{
   const id = req.user.id
-  usersController.destroyUser(id)
+  const data = {status: 'inactive'}
+  usersController.updateUser(id, data)
     .then(response =>{
-      res.status(204).json({message: `User ${id} deleted`, response})
+      res.status(200).json({message: 'User inactive', response})
     })
     .catch(err =>{
-      res.status(400).json({message: err.message})
+      res.status(406).json({message:err.message})
     })
 }
 
