@@ -1,4 +1,6 @@
 const uuid = require('uuid')
+const {Op} = require('sequelize')
+
 const Recipes = require('../models/recipes.models')
 const Users = require('../models/users.models')
 const Categories = require('../models/categories.models')
@@ -8,84 +10,138 @@ const Ingredients = require('../models/ingredients.models')
 const Types = require('../models/types.models')
 const UsersIngredients = require('../models/users_ingredients.models')
 
-const findAll = async () =>{
-  const response = await Recipes.findAll({
-    attributes: {
-        exclude: ['userId', 'categoryId', 'createdAt', 'updatedAt']
-    },
-    include: [
-        {
-            model: Categories
+const getAllRecipes = async () => {
+    const data = await Recipes.findAll({
+        attributes: {
+            exclude: ['userId', 'categoryId', 'createdAt', 'updatedAt']
         },
-        {
-            model: Users,
-            attributes: ['id', 'firstName', 'lastName']
-        },
-        {
-            model: Instructions,
-            attributes: ['step', 'description']
-        },
-        {
-            model: RecipeIngredients,
-            include: {
-                model: Ingredients,
+        include: [
+            {
+                model: Categories
+            },
+            {
+                model: Users,
+                attributes: ['id', 'firstName', 'lastName']
+            },
+            {
+                model: Instructions,
+                attributes: ['step', 'description']
+            },
+            {
+                model: RecipeIngredients,
                 include: {
-                    model: Types
+                    model: Ingredients,
+                    include: {
+                        model: Types
+                    }
                 }
             }
+        ]
+    })
+    return data
+}
+
+const getRecipeById = async (id) => {
+    const data = await Recipes.findOne({
+        where: {
+            id
+        },
+        attributes: {
+            exclude: ['userId', 'categoryId', 'createdAt', 'updatedAt']
+        },
+        include: [
+            {
+                model: Categories
+            },
+            {
+                model: Users,
+                attributes: ['id', 'firstName', 'lastName']
+            },
+            {
+                model: Instructions,
+                attributes: ['step', 'description']
+            },
+            {
+                model: RecipeIngredients,
+                include: {
+                    model: Ingredients,
+                    include: {
+                        model: Types
+                    }
+                }
+            }
+        ]
+    })
+    return data
+}
+
+const createRecipe = async (data) => {
+    const response = await Recipes.create({
+        id: uuid.v4(),
+        title: data.title,
+        description: data.description,
+        urlImg: data.urlImg,
+        time: data.time,
+        portions: data.portions,
+        userId: data.userId,
+        categoryId: data.categoryId,
+        origin: data.origin,
+        likes: data.likes
+    })
+    return response
+}
+
+const updateRecipe = async (id, data) => {
+    const response = await Recipes.update(data, {
+        where: {
+            id
         }
-    ]
-})
-  return response
+    })
+    return response
 }
 
-const findByID = async(id) =>{
-  const response = await Recipes.findOne({
-    where: {
-      id: id
-    }
-  })
-  return response
+const deleteRecipe = async (id) => {
+    const data = await Recipes.destroy({
+        where: {
+            id
+        }
+    })
+    return data
 }
 
-const create = async(input) =>{
-  const response = await Recipes.create({
-    id: uuid.v4(),
-    name: input.name,
-    description: input.description,
-    imgURL: input.imgURL,
-    time: input.time,
-    portions: input.portions,
-    userId: input.userId,
-    categoryId: input.categoryId,
-    origin: input.origin,
-    likes: input.likes
-  })
-  return response
-}
+const getMyRecipes = async(userId) => {
+    const userIngredients = await UsersIngredients.findAll({
+        attributes: ['ingredientId'],
+        where: {
+            userId
+        }
+    })
+    const filteredIngredients = userIngredients.map(obj => obj.ingredientId)
+    const recipeIngredients = await RecipeIngredients.findAll({
+        where: {
+            ingredientId: {
+                [Op.in]: filteredIngredients
+            }
+        }
+    })
 
-const update = async(input, id) =>{
-  const response = await Recipes.update(input, {
-    where: {
-      id: id
-    }
-  })
-  return response
-}
+    const filteredRecipes = recipeIngredients.map(obj => obj.recipeId)
 
-const destroy = async (id) =>{
-  const response = await Recipes.destroy({
-    where: {
-      id: id
-    }
-  })
-  return response
+    const data = await Recipes.findAll({
+        where: {
+            id: {
+                [Op.in]: filteredRecipes
+            }
+        }
+    })
+
+    return data
 }
 
 module.exports = {
-  findAll,
-  findByID, 
-  create, 
-  update,
-  destroy
+    getAllRecipes,
+    getRecipeById,
+    createRecipe,
+    updateRecipe,
+    deleteRecipe
 }

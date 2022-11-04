@@ -1,25 +1,25 @@
 const router = require('express').Router()
 const passport = require('passport')
+
+const recipeServices = require('./recipes.services')
 require('../middlewares/auth.middleware')(passport)
 
-const services = require('./recipes.services')
-
 router.route('/')
-  .get(services.getAll)
-  .post(
-    passport.authenticate('jwt', {session: false}),
-    services.post
-  )
+    .get(recipeServices.getAllRecipes)
+    .post(
+        passport.authenticate('jwt', {session: false}),
+        recipeServices.createRecipe
+    )
 
 router.route('/:recipe_id')
-  .get(services.getByID)
-  .patch(
-    passport.authenticate('jwt', {session: false}),
-    services.patchByID
-  )
-  .delete(
-    passport.authenticate('jwt', {session: false}),
-    services.deleteByID
-  )
+    .get(recipeServices.getRecipeById)
+    .patch(
+        passport.authenticate('jwt', {session: false}),
+        recipeServices.patchRecipe
+    )
+    .delete(
+        passport.authenticate('jwt', {session: false}),
+        recipeServices.deleteRecipe
+    )
 
 module.exports = router
